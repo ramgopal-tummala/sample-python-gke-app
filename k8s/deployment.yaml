@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: sample-python-app
-        image: gcr.io/YOUR_PROJECT_ID/sample-python-gke-app:latest
+        image: gcr.io/deployment-487002/sample-python-gke-app:latest
         ports:
         - containerPort: 8080
           name: http
