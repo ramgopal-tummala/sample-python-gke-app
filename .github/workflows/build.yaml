@@ -1,0 +1,40 @@
+name: Build Docker Image
+
+on:
+  push:
+    branches:
+      - testbranch
+  pull_request:
+    branches:
+      - testbranch
+
+jobs:
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: |
+            sample-python-gke-app:${{ github.sha }}
+            sample-python-gke-app:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Image built successfully
+        run: |
+          echo "✅ Docker image built successfully!"
+          echo "Image tags:"
+          echo "  - sample-python-gke-app:${{ github.sha }}"
+          echo "  - sample-python-gke-app:latest"
