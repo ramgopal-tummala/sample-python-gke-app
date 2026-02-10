@@ -1,0 +1,54 @@
+# Cloud Build configuration for GCP
+steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/sample-python-gke-app:$COMMIT_SHA'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/sample-python-gke-app:latest'
+      - '.'
+    id: 'build-image'
+
+  # Push the container image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/sample-python-gke-app:$COMMIT_SHA'
+    id: 'push-image-sha'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/sample-python-gke-app:latest'
+    id: 'push-image-latest'
+
+  # Deploy to GKE
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args:
+      - 'set'
+      - 'image'
+      - 'deployment/sample-python-app'
+      - 'sample-python-app=gcr.io/$PROJECT_ID/sample-python-gke-app:$COMMIT_SHA'
+    env:
+      - 'CLOUDSDK_COMPUTE_REGION=$_GKE_REGION'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=$_GKE_CLUSTER'
+    id: 'deploy-to-gke'
+
+# Store images in Container Registry
+images:
+  - 'gcr.io/$PROJECT_ID/sample-python-gke-app:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/sample-python-gke-app:latest'
+
+# Substitution variables (set these in Cloud Build trigger)
+substitutions:
+  _GKE_CLUSTER: 'your-cluster-name'
+  _GKE_REGION: 'us-central1'
+
+# Build timeout
+timeout: '1200s'
+
+options:
+  machineType: 'N1_HIGHCPU_8'
+  logging: CLOUD_LOGGING_ONLY
