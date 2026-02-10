@@ -38,11 +38,12 @@ def before_request():
 def home():
     """Home endpoint"""
     return jsonify({
-        'message': 'Welcome to Sample Python GKE App',
+        'message': 'Welcome to Sample Python GKE App - Now with CI/CD!',
         'app_name': app.config['APP_NAME'],
         'version': app.config['VERSION'],
         'environment': app.config['ENV'],
-        'timestamp': datetime.utcnow().isoformat()
+        'timestamp': datetime.utcnow().isoformat(),
+        'status': 'GitHub Actions is working! 🚀'
     })
 
 @app.route('/health')
